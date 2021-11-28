@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 
+//TODO fazer controle de inserção diretamente no arquivo
+//sem o uso de variável global
+int global=0;
+
 typedef struct {
 	int CodCli;
 	int CodF;
@@ -32,11 +36,25 @@ void carrega_arquivos(ClienteFilme *vet_cliF, RemoveReg *vet_rem){
 	fclose(fd);
 }
 
+void inserir(ClienteFilme *vet_cliF, FILE *file){
+	char registro[160];
+	sprintf(registro, "#%d#%d#%s#%s#%s", 
+	vet_cliF[global].CodCli, 
+	vet_cliF[global].CodF, 
+	vet_cliF[global].NomeCli, 
+	vet_cliF[global].NomeF, 
+	vet_cliF[global].Genero);
+	int tam_reg = strlen(registro);
+	//printf("%s", registro);
+	fwrite(&tam_reg, sizeof(int), 1, file);
+	fwrite(registro, sizeof(char), tam_reg, file);
+	global++;
+}
 int main(){
 	int opcao = 0;
 	FILE *file;
 
-	if((file = fopen("MAIN_FILE.dad", "ab+") == NULL)){
+	if((file = fopen("mainfile.bin", "ab+")) == NULL){
 		printf("Nao foi possivel abrir o arquivo");
 		return 0;
 	}
@@ -53,6 +71,7 @@ int main(){
 
 		switch(opcao){
 			case 1:
+				inserir(vet_cliF, file);
 				break;
 			case 2:
 				break;
@@ -60,22 +79,10 @@ int main(){
 				break;
 			case 4:
 				carrega_arquivos(vet_cliF, vet_rem);
-				/*for(int i=0; i<4; i++){
-					printf("\n");
-					printf(" %d", vet_cliF[i].CodCli);
-					printf(" %d", vet_cliF[i].CodF);
-					printf(" %s", vet_cliF[i].NomeCli);
-					printf(" %s", vet_cliF[i].NomeF);
-				}
-				for(int i=0; i<3; i++){
-					printf("\n");
-					printf(" %d", vet_rem[i].CodCli);
-					printf(" %d", vet_rem[i].CodF);
-				
-				}*/
 				break;
 		}
 	}
+	fclose(file);
 	return 0;
 }
 
