@@ -1,9 +1,28 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
-//TODO fazer controle de inserção diretamente no arquivo
-//sem o uso de variável global
-int global=0;
+//criar arquivo controle.bin para armazenar
+//quandos foram inseridos e removidos
+//int#int
+/*
+typedef struct {
+    int qtdInseridos;
+    int qtdRemovidos;
+}Controle;
+*/
+/* TAREFAS
+- Fazer função remove (Definir estratégia da função)
+- Implementar um header no arquivo mainfile
+- Conferir o header antes de inserir
+- Consumir o arquivo controle ao carregas arquivos e Alterá-lo antes de fechar o programa
+- Fazer função de compactação.
+*/
+
+typedef struct {
+	int qtdInserido;
+	int qtdRemovido;
+} Controle;
 
 typedef struct {
 	int CodCli;
@@ -19,36 +38,56 @@ typedef struct {
 	int CodF;
 } RemoveReg;
 
-void carrega_arquivos(ClienteFilme *vet_cliF, RemoveReg *vet_rem){
+void carrega_arquivos(ClienteFilme *vet_cliF, RemoveReg *vet_rem, Controle *controle){
 	FILE *fd;
-	fd = fopen("insere.bin", "ab+");
-	int k = 0;
-	while(fread(&vet_cliF[k], sizeof(ClienteFilme), 1, fd)){
-		k++;		
+	fd = fopen("controle.bin", "ab+");
+	if(fread(controle, sizeof(Controle), 1, fd)){ 
+		printf("\nArquivo Controle.bin carregado");
+	}else{//arquivo ainda vazio
+		controle->qtdInserido = 0;
+		controle->qtdRemovido = 0;
 	}
+	fclose(fd);
+
+	fd = fopen("insere.bin", "ab+");
+	//int k = controle->qtdInserido;
+	int k =0;
+	while(fread(&vet_cliF[k], sizeof(ClienteFilme), 1, fd)){
+		k++;
+	}
+	printf("\nArquivo Insere.bin carregado");
 	fclose(fd);
 
 	fd = fopen("remove.bin", "ab+");
 	k = 0;
+	printf("%d", k);
 	while(fread(&vet_rem[k], sizeof(RemoveReg), 1, fd)){
 		k++;		
 	}
+	printf("\nArquivo remove.bin carregado");
 	fclose(fd);
+
 }
 
-void inserir(ClienteFilme *vet_cliF, FILE *file){
+void inserir(ClienteFilme *vet_cliF, FILE *file, Controle *controle){
 	char registro[160];
 	sprintf(registro, "#%d#%d#%s#%s#%s", 
-	vet_cliF[global].CodCli, 
-	vet_cliF[global].CodF, 
-	vet_cliF[global].NomeCli, 
-	vet_cliF[global].NomeF, 
-	vet_cliF[global].Genero);
+	vet_cliF[controle->qtdInserido].CodCli, 
+	vet_cliF[controle->qtdInserido].CodF, 
+	vet_cliF[controle->qtdInserido].NomeCli, 
+	vet_cliF[controle->qtdInserido].NomeF, 
+	vet_cliF[controle->qtdInserido].Genero);
 	int tam_reg = strlen(registro);
-	//printf("%s", registro);
 	fwrite(&tam_reg, sizeof(int), 1, file);
 	fwrite(registro, sizeof(char), tam_reg, file);
-	global++;
+	controle->qtdInserido++;
+	
+}
+
+void remover(RemoveReg *vet_rem, FILE *file){
+	//percorrer arquivo
+	//se chave primaria igual à chave primaria requerida
+	//então .... colocar marcador 
 }
 int main(){
 	int opcao = 0;
@@ -61,6 +100,8 @@ int main(){
 
 	ClienteFilme vet_cliF[4];
 	RemoveReg vet_rem[3];
+	Controle *controle = (Controle*) malloc(sizeof(Controle));;
+
 	while(opcao != 5){
 		printf("\n1. Insercao");
 		printf("\n2. Remocao");
@@ -71,17 +112,24 @@ int main(){
 
 		switch(opcao){
 			case 1:
-				inserir(vet_cliF, file);
+				inserir(vet_cliF, file, controle);
 				break;
 			case 2:
+				remover(vet_rem, file);
 				break;
 			case 3:
 				break;
 			case 4:
-				carrega_arquivos(vet_cliF, vet_rem);
+				carrega_arquivos(vet_cliF, vet_rem, controle);
+				break;
+			case 5:
 				break;
 		}
 	}
+	fclose(file);
+
+	file = fopen("controle.bin", "wb+");
+	fwrite(controle, sizeof(controle), 1, file);
 	fclose(file);
 	return 0;
 }
