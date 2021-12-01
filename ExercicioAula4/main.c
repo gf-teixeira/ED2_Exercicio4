@@ -93,20 +93,28 @@ void inserir(ClienteFilme *vet_cliF, FILE *file, Controle *controle){
 		printf("\nLeu algo\n");
 		printf("%d", header);
 		if(header != -1){
-			//fseek(header)
+			// fazer a busca para inserir em lugar que estava invalido
+        }else{
+            header = -1;
+            fseek(file, 0, SEEK_END);
+            fwrite(&tam_reg, sizeof(int), 1, file);
+            fwrite(&header, sizeof(int), 1, file);
+            fwrite(&validade, sizeof(char), 1, file);
+            fwrite(registro, sizeof(char), tam_reg, file);
+            controle->qtdInserido++;
+            printf("\nInserido com sucesso.");
         }
 	}else{
 		header = -1;
 		fwrite(&header, sizeof(int), 1, file);
+		fseek(file, 0, SEEK_END);
+        fwrite(&tam_reg, sizeof(int), 1, file);
+        fwrite(&header, sizeof(int), 1, file);
+        fwrite(&validade, sizeof(char), 1, file);
+        fwrite(registro, sizeof(char), tam_reg, file);
+        controle->qtdInserido++;
+        printf("\nInserido com sucesso.");
 	}
-	fseek(file, 0, SEEK_END);
-	fwrite(&tam_reg, sizeof(int), 1, file);
-	fwrite(&validade, sizeof(char), 1, file);
-	fwrite(registro, sizeof(char), tam_reg, file);
-	controle->qtdInserido++;
-	printf("\nInserido com sucesso.");
-
-
 }
 
 void remover(RemoveReg *vet_rem, Controle *controle, FILE *file){
@@ -207,6 +215,7 @@ int pega_registro(FILE *p_out, char *p_reg){
     if (!fread(&bytes, sizeof(int), 1, p_out)){
        return 0;
     }else{
+        fseek(p_out, 4, SEEK_CUR);
         fread(p_reg, bytes+1, 1, p_out);
         return bytes;
     }
