@@ -72,49 +72,36 @@ void inserir(ClienteFilme *vet_cliF, FILE *file, Controle *controle){
 	int header;
 
 	//V : válido, I: inválido
-	sprintf(registro, "#%d#%d#%s#%s#%s",
+	sprintf(registro, "V#%d#%d#%s#%s#%s",
 	vet_cliF[controle->qtdInserido].CodCli,
 	vet_cliF[controle->qtdInserido].CodF,
 	vet_cliF[controle->qtdInserido].NomeCli,
 	vet_cliF[controle->qtdInserido].NomeF,
 	vet_cliF[controle->qtdInserido].Genero);
-	int tam_reg = strlen(registro);
+
+	int tam_reg = strlen(registro); 
 	printf("%s",registro);
 
-	/*int header;
-	if(fread(header, sizeof(int), 1, file)){ //se existir algo no arquivo
-		if(header != -1){ //se for diferente de -1 é necessário mudar a posição do arquivo
-			fseek(file, header, SEEK_SET);
-			//Cada registro disponível irá apontar para outro?
-		}
-	}*/
 	fseek(file,0,SEEK_SET);
 	if(fread(&header, sizeof(int), 1, file)){
-		printf("\nLeu algo\n");
+		printf("\nLeu header\n");
 		printf("%d", header);
 		if(header != -1){
 			// fazer a busca para inserir em lugar que estava invalido
         }else{
-            header = -1;
             fseek(file, 0, SEEK_END);
             fwrite(&tam_reg, sizeof(int), 1, file);
-            fwrite(&header, sizeof(int), 1, file);
-            fwrite(&validade, sizeof(char), 1, file);
-            fwrite(registro, sizeof(char), tam_reg, file);
-            controle->qtdInserido++;
-            printf("\nInserido com sucesso.");
         }
 	}else{
 		header = -1;
 		fwrite(&header, sizeof(int), 1, file);
 		fseek(file, 0, SEEK_END);
         fwrite(&tam_reg, sizeof(int), 1, file);
-        fwrite(&header, sizeof(int), 1, file);
-        fwrite(&validade, sizeof(char), 1, file);
-        fwrite(registro, sizeof(char), tam_reg, file);
-        controle->qtdInserido++;
-        printf("\nInserido com sucesso.");
+       
 	}
+	fwrite(registro, sizeof(char), tam_reg, file);
+    controle->qtdInserido++;
+    printf("\nInserido com sucesso.");
 }
 
 void remover(RemoveReg *vet_rem, Controle *controle, FILE *file){
@@ -125,7 +112,9 @@ void remover(RemoveReg *vet_rem, Controle *controle, FILE *file){
 	char invalido = 'I';
 	int codCliente, codFilme;
 	int tam_reg;
-
+	int offset;
+	int header;
+	
 	printf("\ncontrole->qtdRemovido: %d", controle->qtdRemovido);
 
 	removeCodCliente = vet_rem[controle->qtdRemovido].CodCli;
@@ -135,26 +124,47 @@ void remover(RemoveReg *vet_rem, Controle *controle, FILE *file){
 	printf("\nremoveCodFilme: %d\n", removeCodFilme);
 
 	fseek(file, 4, SEEK_SET);
-
+	offset = 4;
 	tam_reg = pega_registro(file,registro);
+	printf("depois do tam_reg");
+
   	while(tam_reg > 0){
+		printf("\nTESTANDO");
         pch = strtok(registro, "#");
-        pch = strtok(NULL, "#");
-        codCliente = (*pch) - '0';
-        pch = strtok(NULL, "#");
-        codFilme = (*pch) - '0';
-        if((codCliente == removeCodCliente) && (codFilme == removeCodFilme)){
-            printf("Excluido\n");
-            printf("codiguin do cliente excluido: %d\n", codCliente);
-            printf("codiguin do filme excluido: %d\n", codFilme);
-            fseek(file, -(tam_reg+1), SEEK_CUR);
-            fwrite(&invalido, sizeof(char), 1, file);
-            controle->qtdRemovido++;
-            break;
-        }else{
-            tam_reg = pega_registro(file, registro);
-        }
-	}
+		printf("%c", *pch);
+		if(*pch == 'V'){
+			pch = strtok(NULL, "#");
+        	codCliente = (*pch) - '0';
+        	pch = strtok(NULL, "#");
+        	codFilme = (*pch) - '0';
+        	if((codCliente == removeCodCliente) && (codFilme == removeCodFilme)){
+            	printf("Excluido\n");
+            	printf("codiguin do cliente excluido: %d\n", codCliente);
+            	printf("codiguin do filme excluido: %d\n", codFilme);
+            	fseek(file, -(tam_reg), SEEK_CUR);
+            	fwrite(&invalido, sizeof(char), 1, file);
+				// -------------------------------------//
+				fseek(file, 0, SEEK_SET);
+				fread(&header, sizeof(int), 1, file); 
+				fseek(file, 0, SEEK_SET);
+				fwrite(&offset, sizeof(int), 1, file);
+				//fseek(file, offset+5, SEEK_SET);
+				fseek(file, offset+1, SEEK_CUR);
+				fwrite(&header, sizeof(int), 1, file);
+				printf("offset: %d", offset);
+				// --------------------------------------- //
+            	controle->qtdRemovido++;
+            	break;
+			}else{
+				offset = offset + tam_reg + 4;
+				tam_reg = pega_registro(file, registro);
+			}
+		}else{
+			offset = offset + tam_reg + 4;
+			tam_reg = pega_registro(file, registro);
+		}
+        
+}
 
 }
 
@@ -204,9 +214,9 @@ int main(){
 
 	file = fopen("controle.bin", "rb+");
 	fseek(file, 0, SEEK_SET);
-	fwrite(controle, sizeof(Controle), 1, file);  // meu deus KKKKKKKKK fiquei 2 horas procurando o bug do registro
-	fclose(file);                                 // tava no sizeof(controle) ao inves da struct em si tava montando o arquivo
-	return 0;                                     // com 4 bytes a menos PUTA MERDA KKKKKKKK
+	fwrite(controle, sizeof(Controle), 1, file);  
+	fclose(file);                                 
+	return 0;                                     
 }
 
 int pega_registro(FILE *p_out, char *p_reg){
@@ -215,8 +225,7 @@ int pega_registro(FILE *p_out, char *p_reg){
     if (!fread(&bytes, sizeof(int), 1, p_out)){
        return 0;
     }else{
-        fseek(p_out, 4, SEEK_CUR);
-        fread(p_reg, bytes+1, 1, p_out);
+        fread(p_reg, bytes, 1, p_out);
         return bytes;
     }
 }
