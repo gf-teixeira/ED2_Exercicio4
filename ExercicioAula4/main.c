@@ -92,12 +92,11 @@ void inserir(ClienteFilme *vet_cliF, FILE *file, Controle *controle)
 			vet_cliF[controle->qtdInserido].Genero);
 
 	int tam_reg = strlen(registro);
-	printf("%s", registro);
+	printf("\nRegistro: %s", registro);
 	fseek(file, 0, SEEK_SET);
 	if (fread(&header, sizeof(int), 1, file))
 	{
-		printf("\nLeu header\n");
-		printf("%d\n", header);
+		
 		if (header != -1)
 		{
 			fseek(file, header, SEEK_SET);
@@ -131,7 +130,6 @@ void inserir(ClienteFilme *vet_cliF, FILE *file, Controle *controle)
 					offset_troca = ftell(file);
 					fseek(file, 5, SEEK_CUR);
 					fread(&offset, sizeof(int), 1, file);
-					printf("offset anterior = %d", offset_anterior);
 					fseek(file, offset_anterior + 5, SEEK_SET);
 					fwrite(&offset, sizeof(int), 1, file);
 					fseek(file, offset_troca + 4, SEEK_SET);
@@ -171,15 +169,9 @@ void remover(RemoveReg *vet_rem, Controle *controle, FILE *file)
 	int tam_reg;
 	int offset;
 	int header;
-	char ponto = '|';
-
-	printf("\ncontrole->qtdRemovido: %d", controle->qtdRemovido);
 
 	removeCodCliente = vet_rem[controle->qtdRemovido].CodCli;
 	removeCodFilme = vet_rem[controle->qtdRemovido].CodF;
-
-	printf("\nremoveCodCliente: %d", removeCodCliente);
-	printf("\nremoveCodFilme: %d\n", removeCodFilme);
 
 	fseek(file, 4, SEEK_SET);
 	offset = 4;
@@ -197,8 +189,7 @@ void remover(RemoveReg *vet_rem, Controle *controle, FILE *file)
 			if ((codCliente == removeCodCliente) && (codFilme == removeCodFilme))
 			{
 				printf("Excluido\n");
-				printf("codiguin do cliente excluido: %d\n", codCliente);
-				printf("codiguin do filme excluido: %d\n", codFilme);
+				
 				fseek(file, -(tam_reg), SEEK_CUR);
 				fwrite(&invalido, sizeof(char), 1, file);
 				// -------------------------------------//
@@ -208,7 +199,6 @@ void remover(RemoveReg *vet_rem, Controle *controle, FILE *file)
 				fwrite(&offset, sizeof(int), 1, file);
 				fseek(file, offset + 5, SEEK_SET);
 				fwrite(&header, sizeof(int), 1, file);
-				printf("offset: %d", offset);
 				int tam_resto = (tam_reg - 5);
 
 				char pontos[tam_resto];
