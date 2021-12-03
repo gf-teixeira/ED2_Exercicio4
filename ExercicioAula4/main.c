@@ -179,7 +179,6 @@ void remover(RemoveReg *vet_rem, Controle *controle, FILE *file)
 	while (tam_reg > 0)
 	{
 		pch = strtok(registro, "#");
-		printf("\n%c\n", *pch);
 		if (*pch == 'V')
 		{
 			pch = strtok(NULL, "#");
@@ -267,6 +266,7 @@ void compactacao(FILE *file)
 	fclose(aux);
 	remove("mainfile.bin");
 	rename("auxiliar.bin", "mainfile.bin");
+	printf("\nCompactado com sucesso!");
 	
 }
 int main()
