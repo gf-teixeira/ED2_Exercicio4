@@ -13,7 +13,6 @@ int main() {
     } vet[4] = {{1, 1, "Joao da Silva", "Indiana Jones e Os Cacadores da Arca Perdida", "Aventura"},
                 {1, 2, "Joao da Silva", "Matrix", "Aventura"},
 				{1, 3, "Joao da Silva", "Titanic", "Aventura"},
-
 				{2, 3, "Pedro Silva e Silva", "Genio indomavel", "Aventura"},
 				};
 
@@ -27,7 +26,6 @@ int main() {
         int CodF;
     } vet_r[3] = {{1,1},
                   {1,3},
-
                   {2,3}};
 
     fd = fopen("remove.bin", "w+b");
