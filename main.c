@@ -1,22 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-int pega_registro(FILE *p_out, char *p_reg);
 
-/* TAREFAS
-- Fazer função remove (Definir estratégia da função)
-- Implementar um header no arquivo mainfile
-- Conferir o header antes de inserir
-- Fazer alguma forma de ponteiro de um espaço disponível para o outro
-- Fazer função de compactação.
-*/
-typedef struct
-{
+
+
+typedef struct{
 	int qtdInserido;
 	int qtdRemovido;
 } Controle;
-typedef struct
-{
+
+typedef struct{
 	int CodCli;
 	int CodF;
 	char NomeCli[50];
@@ -24,12 +17,65 @@ typedef struct
 	char Genero[50];
 } ClienteFilme;
 
-typedef struct
-{
+typedef struct{
 	int CodCli;
 	int CodF;
 } RemoveReg;
-
+int pega_registro(FILE *p_out, char *p_reg);
+void carrega_arquivos(ClienteFilme *vet_cliF, RemoveReg *vet_rem, Controle *controle);
+void inserir(ClienteFilme *vet_cliF, FILE *file, Controle *controle);
+void remover(RemoveReg *vet_rem, Controle *controle, FILE *file);
+void compactacao(FILE *file);
+int main()
+{
+	int opcao = 0;
+	FILE *file;
+	if ((file = fopen("mainfile.bin", "rb+")) == NULL){
+		printf("Nao foi possivel encontrar o arquivo de dados =(\nVamos criar um...!\n");
+		file = fopen("mainfile.bin", "wb+");
+	}
+	ClienteFilme vet_cliF[5];
+	RemoveReg vet_rem[3];
+	Controle *controle = (Controle *)malloc(sizeof(Controle));
+	while (opcao != 5){
+		printf("\n1. Insercao");
+		printf("\n2. Remocao");
+		printf("\n3. Compactacao");
+		printf("\n4. Carrega Arquivos");
+		printf("\n5. Sair\n");
+		scanf("%d", &opcao);
+		switch (opcao){
+			case 1:
+				inserir(vet_cliF, file, controle);
+				break;
+			case 2:
+				remover(vet_rem, controle, file);
+				break;
+			case 3:
+				compactacao(file);
+				file = fopen("mainfile.bin", "rb+");
+				break;
+			case 4:
+				carrega_arquivos(vet_cliF, vet_rem, controle);
+				for (int i = 0; i < 5; i++)
+				{
+					printf("\n");
+					printf("CodCliente: %d", vet_cliF[i].CodCli);
+					printf("CodFilme: %d", vet_cliF[i].CodF);
+				}
+				printf("\n");
+				break;
+			case 5:
+				break;
+		}
+	}
+	fclose(file);
+	file = fopen("controle.bin", "rb+");
+	fseek(file, 0, SEEK_SET);
+	fwrite(controle, sizeof(Controle), 1, file);
+	fclose(file);
+	return 0;
+}
 void carrega_arquivos(ClienteFilme *vet_cliF, RemoveReg *vet_rem, Controle *controle)
 {
 	FILE *fd;
@@ -268,63 +314,6 @@ void compactacao(FILE *file)
 	rename("auxiliar.bin", "mainfile.bin");
 	printf("\nCompactado com sucesso!");
 	
-}
-int main()
-{
-	int opcao = 0;
-	FILE *file;
-
-	if ((file = fopen("mainfile.bin", "rb+")) == NULL)
-	{
-		printf("Nao foi possivel encontrar o arquivo de dados =(\nVamos criar um...!\n");
-		file = fopen("mainfile.bin", "wb+");
-	}
-
-	ClienteFilme vet_cliF[5];
-	RemoveReg vet_rem[3];
-	Controle *controle = (Controle *)malloc(sizeof(Controle));
-
-	while (opcao != 5)
-	{
-		printf("\n1. Insercao");
-		printf("\n2. Remocao");
-		printf("\n3. Compactacao");
-		printf("\n4. Carrega Arquivos");
-		printf("\n5. Sair\n");
-		scanf("%d", &opcao);
-
-		switch (opcao)
-		{
-		case 1:
-			inserir(vet_cliF, file, controle);
-			break;
-		case 2:
-			remover(vet_rem, controle, file);
-			break;
-		case 3:
-			compactacao(file);
-			file = fopen("mainfile.bin", "rb+");
-			break;
-		case 4:
-			carrega_arquivos(vet_cliF, vet_rem, controle);
-			for (int i = 0; i < 5; i++)
-			{
-				printf("\n");
-				printf("CodCliente: %d", vet_cliF[i].CodCli);
-				printf("CodFilme: %d", vet_cliF[i].CodF);
-			}
-			break;
-		case 5:
-			break;
-		}
-	}
-	fclose(file);
-
-	file = fopen("controle.bin", "rb+");
-	fseek(file, 0, SEEK_SET);
-	fwrite(controle, sizeof(Controle), 1, file);
-	fclose(file);
-	return 0;
 }
 
 int pega_registro(FILE *p_out, char *p_reg)
