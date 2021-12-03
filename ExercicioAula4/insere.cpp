@@ -10,10 +10,11 @@ int main() {
         char NomeCli[50];
         char NomeF[50];
         char Genero[50];
-    } vet[4] = {{1, 1, "Joao da Silva", "Indiana Jones e Os Cacadores da Arca Perdida", "Aventura"},
+    } vet[5] = {{1, 1, "Joao da Silva", "Indiana Jones e Os Cacadores da Arca Perdida", "Aventura"},
                 {1, 2, "Joao da Silva", "Matrix", "Aventura"},
 				{1, 3, "Joao da Silva", "Titanic", "Aventura"},
 				{2, 3, "Pedro Silva e Silva", "Genio indomavel", "Aventura"},
+                {2, 4, "Jao Da Silva Pedro Neto", "O Filme 20304 Segundo", "Aventura e Acao esporte"},
 				};
 
     fd = fopen("insere.bin", "w+b");
