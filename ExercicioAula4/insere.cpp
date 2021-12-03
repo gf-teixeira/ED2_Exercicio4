@@ -10,11 +10,10 @@ int main() {
         char NomeCli[50];
         char NomeF[50];
         char Genero[50];
-    } vet[5] = {{1, 1, "Joao da Silva", "Indiana Jones e Os Cacadores da Arca Perdida", "Aventura"},
+    } vet[4] = {{1, 1, "Joao da Silva", "Indiana Jones e Os Cacadores da Arca Perdida", "Aventura"},
                 {1, 2, "Joao da Silva", "Matrix", "Aventura"},
 				{1, 3, "Joao da Silva", "Titanic", "Aventura"},
 				{2, 3, "Pedro Silva e Silva", "Genio indomavel", "Aventura"},
-                {1,5, "JAO DA SILVA CLEITO NELSON", "O FILMAO GRANDAO AAAAA", "OGENERO GRANDAO"},
 				};
 
     fd = fopen("insere.bin", "w+b");
@@ -25,9 +24,8 @@ int main() {
 	struct remove {
         int CodCli;
         int CodF;
-    } vet_r[4] = {{1,1},
+    } vet_r[3] = {{1,1},
                   {1,3},
-                  {1,5},
                   {2,3}};
 
     fd = fopen("remove.bin", "w+b");
