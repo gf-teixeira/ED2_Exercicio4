@@ -22,7 +22,7 @@ typedef struct{
 	int CodF;
 } RemoveReg;
 int pega_registro(FILE *p_out, char *p_reg);
-void carrega_arquivos(ClienteFilme *vet_cliF, RemoveReg *vet_rem, Controle *controle);
+void carrega_arquivos(ClienteFilme **vet_cliF, RemoveReg **vet_rem, Controle *controle);
 void inserir(ClienteFilme *vet_cliF, FILE *file, Controle *controle);
 void remover(RemoveReg *vet_rem, Controle *controle, FILE *file);
 void compactacao(FILE *file);
@@ -34,8 +34,8 @@ int main()
 		printf("Nao foi possivel encontrar o arquivo de dados =(\nVamos criar um...!\n");
 		file = fopen("mainfile.bin", "wb+");
 	}
-	ClienteFilme vet_cliF[5];
-	RemoveReg vet_rem[3];
+	ClienteFilme *vet_cliF = NULL;
+	RemoveReg *vet_rem = NULL;
 	Controle *controle = (Controle *)malloc(sizeof(Controle));
 	while (opcao != 5){
 		printf("\n1. Insercao");
@@ -56,12 +56,20 @@ int main()
 				file = fopen("mainfile.bin", "rb+");
 				break;
 			case 4:
-				carrega_arquivos(vet_cliF, vet_rem, controle);
+
+				carrega_arquivos(&vet_cliF, &vet_rem, controle);
+
 				for (int i = 0; i < 5; i++)
 				{
 					printf("\n");
 					printf("CodCliente: %d", vet_cliF[i].CodCli);
-					printf("CodFilme: %d", vet_cliF[i].CodF);
+					printf("CodFilme: %d",  vet_cliF[i].CodF);
+				}
+			for (int i = 0; i < 3; i++)
+				{
+					printf("\n REM:");
+					printf("CodCliente: %d", vet_rem[i].CodCli);
+					printf("CodFilme: %d",  vet_rem[i].CodF);
 				}
 				printf("\n");
 				break;
@@ -74,9 +82,12 @@ int main()
 	fseek(file, 0, SEEK_SET);
 	fwrite(controle, sizeof(Controle), 1, file);
 	fclose(file);
+	free(vet_cliF);
+	free(vet_rem);
+	free(controle);
 	return 0;
 }
-void carrega_arquivos(ClienteFilme *vet_cliF, RemoveReg *vet_rem, Controle *controle)
+void carrega_arquivos(ClienteFilme **vet_cliF, RemoveReg **vet_rem, Controle *controle)
 {
 	FILE *fd;
 	int valoresControles;
@@ -103,9 +114,13 @@ void carrega_arquivos(ClienteFilme *vet_cliF, RemoveReg *vet_rem, Controle *cont
 	}
 	fclose(fd);
 	fd = fopen("insere.bin", "rb+");
+
 	int k = 0;
-	while (fread(&vet_cliF[k], sizeof(ClienteFilme), 1, fd))
+	ClienteFilme clienteFilmeAux;
+	while ((fread(&clienteFilmeAux, sizeof(ClienteFilme), 1, fd)))
 	{
+		(*vet_cliF) = (ClienteFilme*)realloc((*vet_cliF), (k+1) * sizeof(ClienteFilme));
+		(*vet_cliF)[k] = clienteFilmeAux;
 		k++;
 	}
 	printf("\nArquivo Insere.bin carregado");
@@ -113,8 +128,11 @@ void carrega_arquivos(ClienteFilme *vet_cliF, RemoveReg *vet_rem, Controle *cont
 
 	fd = fopen("remove.bin", "rb+");
 	k = 0;
-	while (fread(&vet_rem[k], sizeof(RemoveReg), 1, fd))
+	RemoveReg removeRegAux;
+	while (fread(&removeRegAux, sizeof(RemoveReg), 1, fd))
 	{
+		(*vet_rem) = (RemoveReg *)realloc((*vet_rem), (k+1) * sizeof(RemoveReg));
+		(*vet_rem)[k] = removeRegAux;
 		k++;
 	}
 	printf("\nArquivo remove.bin carregado");
