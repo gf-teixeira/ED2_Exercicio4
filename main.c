@@ -58,20 +58,6 @@ int main()
 			case 4:
 
 				carrega_arquivos(&vet_cliF, &vet_rem, controle);
-
-				for (int i = 0; i < 5; i++)
-				{
-					printf("\n");
-					printf("CodCliente: %d", vet_cliF[i].CodCli);
-					printf("CodFilme: %d",  vet_cliF[i].CodF);
-				}
-			for (int i = 0; i < 3; i++)
-				{
-					printf("\n REM:");
-					printf("CodCliente: %d", vet_rem[i].CodCli);
-					printf("CodFilme: %d",  vet_rem[i].CodF);
-				}
-				printf("\n");
 				break;
 			case 5:
 				break;
@@ -90,25 +76,15 @@ int main()
 void carrega_arquivos(ClienteFilme **vet_cliF, RemoveReg **vet_rem, Controle *controle)
 {
 	FILE *fd;
-	int valoresControles;
 
 	if ((fd = fopen("controle.bin", "rb+")) == NULL)
 	{
 		printf("Nao foi possivel encontrar o arquivo de controle =(\nVamos criar um...!\n");
 		fd = fopen("controle.bin", "wb+");
 	}
-	fseek(fd, 0, SEEK_SET);
-	if (fread(&valoresControles, sizeof(int), 1, fd))
-	{
-		fseek(fd, 0, SEEK_SET);
+	if(fread(controle, sizeof(Controle), 1, fd)){
 		printf("\nArquivo Controle.bin carregado");
-		fread(&valoresControles, sizeof(int), 1, fd);
-		controle->qtdInserido = valoresControles;
-		fread(&valoresControles, sizeof(int), 1, fd);
-		controle->qtdRemovido = valoresControles;
-	}
-	else
-	{ //arquivo Controle ainda vazio
+	}else{
 		controle->qtdInserido = 0;
 		controle->qtdRemovido = 0;
 	}
