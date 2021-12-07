@@ -1,3 +1,9 @@
+/***************************
+ * Alunos: Gabriel Ferreira Teixeira & Guilherme Henrique Zampronio
+ * Disciplina: Estrutura de Dados 2.
+ * Exercício Aula 4
+ *****************************/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
